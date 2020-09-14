@@ -42,6 +42,7 @@ class TweetsController < ApplicationController
   # PATCH/PUT /tweets/1
   # PATCH/PUT /tweets/1.json
   def update
+    if current_user == @tweet.user
     respond_to do |format|
       if @tweet.update(tweet_params)
         format.html { redirect_to @tweet, notice: 'Tweet was successfully updated.' }
@@ -51,15 +52,28 @@ class TweetsController < ApplicationController
         format.json { render json: @tweet.errors, status: :unprocessable_entity }
       end
     end
+    else
+      respond_to do |format|
+        format.html { redirect_to tweets_url, notice: "You don't have permission to edit this tweet" }
+        format.json { head :no_content }
+      end
+    end
   end
 
   # DELETE /tweets/1
   # DELETE /tweets/1.json
   def destroy
-    @tweet.destroy
-    respond_to do |format|
-      format.html { redirect_to tweets_url, notice: 'Tweet was successfully destroyed.' }
-      format.json { head :no_content }
+    if current_user == @tweet.user
+      @tweet.destroy
+      respond_to do |format|
+        format.html { redirect_to tweets_url, notice: 'Tweet was successfully destroyed.' }
+        format.json { head :no_content }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to tweets_url, notice: "You don't have permission to delete this tweet" }
+        format.json { head :no_content }
+      end
     end
   end
 
